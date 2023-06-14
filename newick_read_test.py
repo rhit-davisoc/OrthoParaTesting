@@ -6,8 +6,8 @@ tree = dendropy.Tree.get(
     data=s1,
     schema="newick")
 
-print(tree.as_string(schema="newick",) + "\n")
-print(tree.as_ascii_plot())
+# print(tree.as_string(schema="newick",) + "\n")
+# print(tree.as_ascii_plot())
 
 
 def get_geneid(label):
