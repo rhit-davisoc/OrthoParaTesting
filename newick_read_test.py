@@ -9,7 +9,7 @@ tree = dendropy.Tree.get(
     schema="newick")
 
 # print(tree.as_string(schema="newick",) + "\n")
-# print(tree.as_ascii_plot())
+print(tree.as_ascii_plot())
 
 def get_geneid(label):
     if "-" in label:
@@ -82,7 +82,7 @@ def print_2d_dict(rel_dict):
             else:
                 print("\t\t",end = " ")
         print("\n")
-        
+
 
 rel_dict = label_tree_events(tree)
 
