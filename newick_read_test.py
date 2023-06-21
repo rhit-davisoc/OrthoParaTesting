@@ -9,13 +9,7 @@ tree = dendropy.Tree.get(
     schema="newick")
 
 # print(tree.as_string(schema="newick",) + "\n")
-# print(tree.as_ascii_plot())
-
-def get_geneid(label):
-    if "-" in label:
-        return label.split('-')[1]
-    else:
-        return ""
+print(tree.as_ascii_plot())
 
 def get_species(label):
     if "-" in label:
@@ -32,9 +26,9 @@ def label_tree_events(tree, start=1.0):
     for node in tree.postorder_node_iter():
         if node.is_leaf():
             node.species = [get_species(str(node.taxon))]
-            node.gene = [get_geneid(str(node.taxon))]
+            node.sp_occured = False #Indicator for if speciation occured
             node.clade = [str(node.taxon)]
-            rel_dict[str(node.taxon)] = {} 
+            rel_dict[str(node.taxon)] = {}
         else:
             assign_relationships(node, rel_dict)
     return rel_dict
@@ -50,9 +44,13 @@ def assign_relationships(node, rel_dict):
         #so the combinations {man-a,mouse-a}, {man-a,mouse-b}, {man-b,mouse-a}, {man-b,mouse-b} would be orthologs)
         if not set(children[0].species) & set(children[1].species):
             event = "orthologous"
+            node.sp_occured = True
         else:
             #Duplication occured, label combinations of species at this node paralogous
-            event = "paralogous"
+            if(children[0].sp_occured or children[1].sp_occured):
+                event = "out-paralogous"
+            else:
+                event = "in-paralogous"
 
         for tax_1,tax_2 in itertools.product(children[0].clade,children[1].clade):
             #Print out line by line as orthologous/paralogous relationships are found
@@ -65,25 +63,21 @@ def assign_relationships(node, rel_dict):
 
 
 # Given a 2d dictionary of relationships, print out a the information in a matrix
-def print_2d_dict(rel_dict):
+def print_relationships_of_child(target_child,rel_dict):
     child_list = rel_dict.keys()
-
-    print(f"{'':<10}", end = " ")
-    for child in child_list:
-        print("\t" + child, end = " ")
-
-    print("\n")
     
-    for child_row in child_list:
-        print(f"{child_row:<15}", end = " ")
-        for child_col in child_list:
-            if(child_row != child_col):
-                print(rel_dict[child_row][child_col] + "\t", end = " ")
-            else:
-                print("\t\t",end = " ")
-        print("\n")
-        
+    print(target_child + ":")
+
+    for child in child_list:
+        if(target_child != child):
+            print("\t" + child + ": " + rel_dict[target_child][child])
+
+def print_all_relationships(child_list,rel_dict):
+    for child in child_list:
+        print_relationships_of_child(child,rel_dict)
+        print("")
+
 
 rel_dict = label_tree_events(tree)
 
-print_2d_dict(rel_dict)
+print_all_relationships(rel_dict.keys(),rel_dict)
