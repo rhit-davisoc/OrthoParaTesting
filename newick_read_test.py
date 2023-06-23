@@ -2,7 +2,7 @@ import dendropy
 import itertools
 
 # Tree to test with
-s1 = "((man-a,man-b),((mouse-a,zebra-a),(mouse-c,deer-c)));"
+s1 = "((man-a,man-b),((mouse-a,zebra-a),(mouse-c,deer-c,dog-c)));"
 
 tree = dendropy.Tree.get(
     data=s1,
@@ -35,8 +35,10 @@ def label_tree_events(tree, start=1.0):
 
 # Assign paralogous or orthologous relationship(s) at a given node
 def assign_relationships(node, rel_dict):
-    if (node.num_child_nodes() == 2):
-        children = node.child_nodes()
+    children = node.child_nodes()
+    num_children = node.num_child_nodes()
+
+    if (num_children == 2):
         event = ""
 
         #Speciation occured, label combination of species in each clade orthologous
@@ -47,8 +49,8 @@ def assign_relationships(node, rel_dict):
             node.sp_occured = True
         else:
             #Duplication occured, label combinations of species at this node paralogous
-            if(children[0].sp_occured or children[1].sp_occured):
-                event = "out-paralogous"
+            if (children[0].sp_occured or children[1].sp_occured):
+                event = "paralogous"
             else:
                 event = "in-paralogous"
 
@@ -60,6 +62,39 @@ def assign_relationships(node, rel_dict):
         
         node.species = children[0].species + children[1].species
         node.clade = children[0].clade + children[1].clade
+    else:
+        #There are more than 2 children (polytomy)
+        speciation = False
+        duplication = False
+        event = ""
+
+        for i in range(0, num_children):
+            for k in range(i, num_children):
+                if(i != k):
+                    if speciation and duplication:
+                        break
+                    if not (set(children[i].species) & set(children[k].species)):
+                        speciation = True
+                    else:
+                        duplication = True
+
+        if speciation & duplication:
+            event = "ambiguous"
+        elif speciation:
+            event = "orthologous"
+        else:
+            event = "paralogous"
+
+        node.clade = []
+        node.species = []
+
+        for child in children:
+            node.clade += child.clade
+            node.species += child.species
+
+        for tax_1,tax_2 in itertools.product(node.clade,node.clade):
+            if(tax_1 != tax_2):
+                rel_dict[tax_1][tax_2] = event
 
 
 # Given a 2d dictionary of relationships, print out a the information in a matrix
