@@ -9,9 +9,9 @@ parser.add_argument('--dir', nargs='?',
                     help='directory in which to output relationship information',default='')
 args = parser.parse_args()
 
+
 # Tree to test with
 s1 = "((man-a,man-b),((mouse-a,zebra-a),(mouse-c,deer-c,dog-c)));"
-
 tree = dendropy.Tree.get(
     data=s1,
     schema="newick")
@@ -19,11 +19,18 @@ tree = dendropy.Tree.get(
 # print(tree.as_string(schema="newick",) + "\n")
 # print(tree.as_ascii_plot())
 
+separator = input('Specify the separator: ')
+print('')
+
 def get_species(label):
-    if "-" in label:
-        return label.split('-')[0]
-    else:
-        return ""
+    if ' ' in label:
+        return label.split(' ')[0]
+    
+    elif separator not in label:
+            print('Incorrect separator\n')
+            exit()
+
+    return label.split(separator)[0]
 
 # Label pairs of taxons paralogs or orthologs
 # Orthologs -> Result of a speciation event
