@@ -1,5 +1,13 @@
 import dendropy
 import itertools
+import argparse
+
+parser = argparse.ArgumentParser(description='Label orthologous/paralogous relationships of a given tree.')
+parser.add_argument('--targets', nargs='*',
+                    help='genes that will have a file output of their relationships')
+parser.add_argument('--dir', nargs='?',
+                    help='directory in which to output relationship information',default='')
+args = parser.parse_args()
 
 # Tree to test with
 s1 = "((man-a,man-b),((mouse-a,zebra-a),(mouse-c,deer-c,dog-c)));"
@@ -9,7 +17,7 @@ tree = dendropy.Tree.get(
     schema="newick")
 
 # print(tree.as_string(schema="newick",) + "\n")
-print(tree.as_ascii_plot())
+# print(tree.as_ascii_plot())
 
 def get_species(label):
     if "-" in label:
@@ -20,15 +28,14 @@ def get_species(label):
 # Label pairs of taxons paralogs or orthologs
 # Orthologs -> Result of a speciation event
 # Paralogs -> Result of a duplication event
-
 def label_tree_events(tree, start=1.0):
     rel_dict = {}
     for node in tree.postorder_node_iter():
         if node.is_leaf():
             node.species = [get_species(str(node.taxon))]
             node.sp_occured = False #Indicator for if speciation occured
-            node.clade = [str(node.taxon)]
-            rel_dict[str(node.taxon)] = {}
+            node.clade = [str(node.taxon.label)]
+            rel_dict[node.taxon.label] = {}
         else:
             assign_relationships(node, rel_dict)
     return rel_dict
@@ -50,7 +57,7 @@ def assign_relationships(node, rel_dict):
         else:
             #Duplication occured, label combinations of species at this node paralogous
             if (children[0].sp_occured or children[1].sp_occured):
-                event = "paralogous"
+                event = "out-paralogous"
             else:
                 event = "in-paralogous"
 
@@ -113,6 +120,33 @@ def print_all_relationships(child_list,rel_dict):
         print("")
 
 
+# Given a 2d dictionary of relationships, output all relationship for the target taxon to a text file
+def write_relationships_of_child(target_child,rel_dict,dir):
+    child_list = rel_dict.keys()
+
+    f = open(dir + target_child + ".txt",'w')
+    
+    f.write('taxon\t\trelationship\textra information\n')
+
+    for child in child_list:
+        if(target_child != child):
+            relationship = rel_dict[target_child][child]
+            if(relationship == "in-paralogous" or relationship == 'out-paralogous'):
+                f.write(child + '\t\t' + 'paralogous' + '\t\t' + relationship)
+            else:
+                f.write(child + "\t\t" + relationship)
+            f.write('\n')
+
+def write_all_relationships(child_list,rel_dict,dir):
+    for child in child_list:
+        write_relationships_of_child(child,rel_dict,dir)
+
+
+
 rel_dict = label_tree_events(tree)
 
-print_all_relationships(rel_dict.keys(),rel_dict)
+if(args.targets):
+    print_all_relationships(args.targets,rel_dict)
+    write_all_relationships(args.targets,rel_dict,args.dir)
+else:
+    print_all_relationships(rel_dict.keys(),rel_dict)
