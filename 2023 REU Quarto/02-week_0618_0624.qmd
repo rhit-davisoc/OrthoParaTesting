@@ -5,16 +5,39 @@ execute:
 ---
 
 ## Background
-
+- Phylogenetic trees
+  * Depict the lines of evolutionary descent of different species or genes from a common ancestor
+- Orthlogs and Paralogs
+  * Orthologs are homologous genes in different species that diverged from a single ancestral gene after a speciation event
+  * Paralogs are homologous genes that originate from the duplication of an ancestral gene
+- Newick Format
+  * A way to encode phylogenetic trees
+  * An example is "(A, (B, C));", where A is the root and B and C are the two children.
 
 ## Methods
+
+In order to determine the relationships between any two taxa, we first convert the newick string to a tree using the dendropy package. We define a taxon to be any leaf of the tree. The species of a taxon is determined by the string before the user-specified separator (e.g. "man" is the species for taxon "man-a" given "-" as the separator). 
+
+We then label the relationships through a post-order traversal of the tree and comparison of the children of the internal nodes. For leaves, as a base case, the set of species is set as the species we read from the taxon. For internal nodes with two children, we compare both sets of species. If the intersection between the two sets of species is empty, we label the relationships between the clades of each child as orthologous. Otherwise, we label the relationships paralogous.
+
+We currently distinguish between in-paralogs and out-paralogs by whether a speciation event occured more recently than the duplication event of two taxa. In the case where no speciation event has been recorded while traversing up the tree, the relationship of two paralogs are in-paralogous. Otherwise we have seen a speciation event occur more recently than the duplication event, so the relationship is out-paralogous.
+
+There are three cases of polytomies, so we first need to identify which one we're dealing with. One of the cases is when we only had speciation, and all the species are different. Therefore, we label the genes as "orthologous". 
+Another case is when we only had duplication, and all the species are the same. Therefore we label the genes as "paralogous". We have a third case too, where duplication happened and speciation too. When the information about the order of speciation and duplication is unclear, the current solution is to label those genes as "ambiguous". Even in this case, a specific gene can be paralogous to one gene and have an ambiguous relaionship with another one
 
 
 ## Results
 
+For each taxon given by the user, a text file will be outputed with the relationships of that taxon and the rest of the taxa in the given tree. If no taxa are specified, then a separate file will be produced for all taxa. The name of the file will be the name of the given taxa of interest. The file has three columns: the taxa being compared, the relationship, and extra information. The relationship will be either orthologous, paralogous, or ambiguous. If the relationship is paralogous, then the extra information column will note whether the relationship is in-paralogous, out-paralogous, or remain empty if the specific relationship could not be determined.
+
 
 ## Discussion
 
+How does the whole workflow / process work? (Sequences to alignment to phylogenetic trees)
+
+Are we dealing with horizontal gene transfer?
+
+What is the prefered input method? (Command line vs prompt)
 
 
 ::: {.content-visible when-format="html"}

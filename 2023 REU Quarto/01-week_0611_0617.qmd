@@ -27,6 +27,25 @@ execute:
 ## Results
 
 ![An example tree with a matrix of relationships between taxons.](./figures/Week1LabelingResult.PNG){#week1-res}
+s
+The separator between the taxon and the gene ID does not have to be a dash anymore. The algorithm works with any character except for the restricted ones.
+
+Polytomy examples
+1. Only speciation
+2. Only duplication
+3. Mix of both (Ambiguous)
+  * When the information about the order of the speciation and duplication is not clear, the current solution is to label “ambiguous” for the genes in the polytomies.
+
+Clear understanding of what we should label as in-paralogs or out-paralogs
+  *  A pair of genes can be in-paralogs or out-paralogs relative to different speciation events in the phylogenetic tree. An simple strategy we came up with (Renee advised) is to track back the relationship to the most recent speciation event.
+  * The first column in the file will be the other gene names, the second column will be “orthrolog” or “paralog”, and the third column provides additional information such as the sub-category “in-paralog”, “out-paralog”, or “ambiguous”.
+
+Output only the relationships between a specified gene and all other genes
+  * Include the gene when running from the command line
+
+
+Questions:
+1. starting from sequences —> multiple sequence alignment —> phylogenetic tree inference
 
 ## Discussion
 While working through a simple way to label the tree, we follow certain assumptions that simplify the process. We need to know what kind of cases we are working with and what a given tree would realistically look like.
