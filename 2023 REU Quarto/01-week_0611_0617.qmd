@@ -19,19 +19,19 @@ execute:
 - Visualize tree to confirm structure
 - Start at leaves a keep track of the genes we've come across and the species we've come across as we traverse up the tree by storing them in sets.
 - Also label relationships (orthologous or paralogous) as you compare children
-  * If there is no shared taxons between the sets of the children, then we assume there is speciation event so we label paralogous
+  * If there is no shared taxa between the sets of the children, then we assume there is speciation event so we label paralogous
   * If there is no shared genes between the sets of the children, then we assume there is a duplication event so we label paralogous
   * No current handle for if both are true (see discussion below)
   * If neither are true, no changes occured (we shouldn't see this, that would be a node splitting into two exact children (e.g. (man-a, man-a))).
 
 ## Results
 
-![An example tree with a matrix of relationships between taxons.](./figures/Week1LabelingResult.PNG){#week1-res}
+![An example tree with a matrix of relationships between taxa.](./figures/Week1LabelingResult.PNG){#week1-res}
 
 ## Discussion
 While working through a simple way to label the tree, we follow certain assumptions that simplify the process. We need to know what kind of cases we are working with and what a given tree would realistically look like.
 
-The above labelling only works for trees that always have a duplication or speciation event and experience no gene loss. Further, we assume that each of these events lead to unique taxons/gene ids. Our question for this is whether a speciation (or duplication) event can lead to a species (or geneid) we've seen before. For example, the tree below:
+The above labelling only works for trees that always have a duplication or speciation event and experience no gene loss. Further, we assume that each of these events lead to unique taxa/gene ids. Our question for this is whether a speciation (or duplication) event can lead to a species (or geneid) we've seen before. For example, the tree below:
 
 ![A tree with two speciations, resulting in two zebra species](./figures/RepeatSpecExample.PNG){#repeat-spec}
 
@@ -41,7 +41,7 @@ Another case we need more context to cover is whether we can see a node with chi
 
 ![A tree with gene loss, making the paralogous/orthologous relationship unclear.](./figures/AmbigousExample.PNG){#ambig-ex}
 
-Without more context (either from possible extra parameters or comparison to other trees), we cannot confidently label the taxons as orthologs or paralogs. In the two simplest cases, the above tree could have resulted from duplication then speciation, or vice versa, with there being gene loss of the "zebra-b" and "horse-a" taxons. Based on which event occured first, the relationship changes.
+Without more context (either from possible extra parameters or comparison to other trees), we cannot confidently label the taxa as orthologs or paralogs. In the two simplest cases, the above tree could have resulted from duplication then speciation, or vice versa, with there being gene loss of the "zebra-b" and "horse-a" taxa. Based on which event occured first, the relationship changes.
 
 Another point of discussion is inparalogs and outparalogs. Since those relationships are relative to a certain event, is the user specifiying what event to compare the relationships to?
 

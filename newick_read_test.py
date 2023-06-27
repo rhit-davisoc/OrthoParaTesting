@@ -11,13 +11,13 @@ args = parser.parse_args()
 
 
 # Tree to test with
-s1 = "((man-a,man-b),((mouse-a,zebra-a),(mouse-c,deer-c,dog-c)));"
+s1 = "(man-1,man-2,zebra-2);"
 tree = dendropy.Tree.get(
     data=s1,
     schema="newick")
 
 # print(tree.as_string(schema="newick",) + "\n")
-# print(tree.as_ascii_plot())
+print(tree.as_ascii_plot())
 
 separator = input('Specify the separator: ')
 print('')
@@ -65,8 +65,10 @@ def assign_relationships(node, rel_dict):
             #Duplication occured, label combinations of species at this node paralogous
             if (children[0].sp_occured or children[1].sp_occured):
                 event = "out-paralogous"
+                node.sp_occured = True
             else:
                 event = "in-paralogous"
+                node.sp_occured = False
 
         for tax_1,tax_2 in itertools.product(children[0].clade,children[1].clade):
             #Print out line by line as orthologous/paralogous relationships are found
@@ -108,7 +110,10 @@ def assign_relationships(node, rel_dict):
 
         for tax_1,tax_2 in itertools.product(node.clade,node.clade):
             if(tax_1 != tax_2):
-                rel_dict[tax_1][tax_2] = event
+                if(event == "ambiguous" and (get_species(tax_1) == get_species(tax_2))):
+                    rel_dict[tax_1][tax_2] = "paralogous"
+                else:
+                    rel_dict[tax_1][tax_2] = event
 
 
 # Given a 2d dictionary of relationships, print out a the information in a matrix
