@@ -15,6 +15,7 @@ book:
   chapters:
     - index.qmd
     - 01-week_0611_0617.qmd
+    - 02-week_0618_0624.qmd
     - references.qmd
 
 bibliography: references.bib # Use bibtex editing tool such as BibDesk

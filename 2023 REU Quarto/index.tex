@@ -184,7 +184,7 @@
 \begin{document}
 \frontmatter
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[colback={codebgcolor}, enhanced, borderline west={3pt}{0pt}{shadecolor}, boxrule=0pt, sharp corners, frame hidden, breakable]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[sharp corners, breakable, borderline west={3pt}{0pt}{shadecolor}, colback={codebgcolor}, frame hidden, enhanced, boxrule=0pt]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Contents}
 {
@@ -265,8 +265,8 @@
   \begin{itemize}
   \tightlist
   \item
-    If there is no shared taxons between the sets of the children, then
-    we assume there is speciation event so we label paralogous
+    If there is no shared taxa between the sets of the children, then we
+    assume there is speciation event so we label paralogous
   \item
     If there is no shared genes between the sets of the children, then
     we assume there is a duplication event so we label paralogous
@@ -288,7 +288,7 @@
 
 }
 
-\caption{An example tree with a matrix of relationships between taxons.}
+\caption{An example tree with a matrix of relationships between taxa.}
 
 \end{figure}
 
@@ -302,9 +302,9 @@ like.
 
 The above labelling only works for trees that always have a duplication
 or speciation event and experience no gene loss. Further, we assume that
-each of these events lead to unique taxons/gene ids. Our question for
-this is whether a speciation (or duplication) event can lead to a
-species (or geneid) we've seen before. For example, the tree below:
+each of these events lead to unique taxa/gene ids. Our question for this
+is whether a speciation (or duplication) event can lead to a species (or
+geneid) we've seen before. For example, the tree below:
 
 \begin{figure}
 
@@ -335,11 +335,11 @@ relationship unclear.}
 \end{figure}
 
 Without more context (either from possible extra parameters or
-comparison to other trees), we cannot confidently label the taxons as
+comparison to other trees), we cannot confidently label the taxa as
 orthologs or paralogs. In the two simplest cases, the above tree could
 have resulted from duplication then speciation, or vice versa, with
-there being gene loss of the ``zebra-b'' and ``horse-a'' taxons. Based
-on which event occured first, the relationship changes.
+there being gene loss of the ``zebra-b'' and ``horse-a'' taxa. Based on
+which event occured first, the relationship changes.
 
 Another point of discussion is inparalogs and outparalogs. Since those
 relationships are relative to a certain event, is the user specifiying
@@ -352,6 +352,81 @@ have the display as a matrix, but this may be unsuitable for very large
 trees. Some ideas are to output a file (text, cvs, etc.). We also store
 the relationships in a nested dictionary, so it is easy to look up
 specific relationships in constant time.
+
+\bookmarksetup{startatroot}
+
+\hypertarget{week-jun-18---jun-24}{%
+\chapter{Week Jun 18 - Jun 24}\label{week-jun-18---jun-24}}
+
+\hypertarget{background-1}{%
+\section{Background}\label{background-1}}
+
+Orthologs are homologous genes in different species that diverged from a
+single ancestral gene after a speciation event. Paralogs are homologous
+genes that originate from the duplication of an ancestral gene. (Todo:
+Add citations. More info on inparalog/outparalog. More on why
+distinguishing relationships is useful)
+
+\hypertarget{methods-1}{%
+\section{Methods}\label{methods-1}}
+
+In order to determine the relationships between any two taxa, we first
+convert the newick string to a tree using the dendropy package. We
+define a taxon to be any leaf of the tree. The species of a taxon is
+determined by the string before the user-specified separator
+(e.g.~``man'' is the species for taxon ``man-a'' given ``-'' as the
+separator).
+
+We then label the relationships through a post-order traversal of the
+tree and comparison of the children of the internal nodes. For leaves,
+as a base case, the set of species is set as the species we read from
+the taxon. For internal nodes with two children, we compare both sets of
+species. If the intersection between the two sets of species is empty,
+we label the relationships between the clades of each child as
+orthologous. Otherwise, we label the relationships paralogous.
+
+We currently distinguish between in-paralogs and out-paralogs by whether
+a speciation event occured more recently than the duplication event of
+two taxa. In the case where no speciation event has been recorded while
+traversing up the tree, the relationship of two paralogs are
+in-paralogous. Otherwise we have seen a speciation event occur more
+recently than the duplication event, so the relationship is
+out-paralogous.
+
+There are three cases of polytomies, so we first need to identify which
+one we're dealing with. One of the cases is when we only had speciation,
+and all the species are different. Therefore, we label the genes as
+``orthologous''. Another case is when we only had duplication, and all
+the species are the same. Therefore we label the genes as
+``paralogous''. We have a third case too, where duplication happened and
+speciation too. When the information about the order of speciation and
+duplication is unclear, the current solution is to label those genes as
+``ambiguous''. Even in this case, a specific gene can be paralogous to
+one gene and have an ambiguous relaionship with another one
+
+\hypertarget{results-1}{%
+\section{Results}\label{results-1}}
+
+For each taxon given by the user, a text file will be outputed with the
+relationships of that taxon and the rest of the taxa in the given tree.
+If no taxa are specified, then a separate file will be produced for all
+taxa. The name of the file will be the name of the given taxa of
+interest. The file has three columns: the taxa being compared, the
+relationship, and extra information. The relationship will be either
+orthologous, paralogous, or ambiguous. If the relationship is
+paralogous, then the extra information column will note whether the
+relationship is in-paralogous, out-paralogous, or remain empty if the
+specific relationship could not be determined.
+
+\hypertarget{discussion-1}{%
+\section{Discussion}\label{discussion-1}}
+
+How does the whole workflow / process work? (Sequences -\textgreater{}
+alignment -\textgreater{} phylogenetic trees)
+
+Are we dealing with horizontal gene transfer?
+
+What is the prefered input method? (Command line vs prompt)
 
 \bookmarksetup{startatroot}
 

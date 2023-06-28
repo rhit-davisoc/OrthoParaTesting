@@ -64,7 +64,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./references.html" rel="next">
+<link href="./02-week_0618_0624.html" rel="next">
 <link href="./index.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -145,6 +145,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./02-week_0618_0624.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Week Jun 18 - Jun 24</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./references.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">References</span></a>
   </div>
@@ -213,7 +219,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Start at leaves a keep track of the genes we’ve come across and the species we’ve come across as we traverse up the tree by storing them in sets.</li>
 <li>Also label relationships (orthologous or paralogous) as you compare children
 <ul>
-<li>If there is no shared taxons between the sets of the children, then we assume there is speciation event so we label paralogous</li>
+<li>If there is no shared taxa between the sets of the children, then we assume there is speciation event so we label paralogous</li>
 <li>If there is no shared genes between the sets of the children, then we assume there is a duplication event so we label paralogous</li>
 <li>No current handle for if both are true (see discussion below)</li>
 <li>If neither are true, no changes occured (we shouldn’t see this, that would be a node splitting into two exact children (e.g.&nbsp;(man-a, man-a))).</li>
@@ -225,14 +231,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="week1-res" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="./figures/Week1LabelingResult.PNG" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">An example tree with a matrix of relationships between taxons.</figcaption>
+<figcaption class="figure-caption">An example tree with a matrix of relationships between taxa.</figcaption>
 </figure>
 </div>
 </section>
 <section id="discussion" class="level2" data-number="1.4">
 <h2 data-number="1.4" class="anchored" data-anchor-id="discussion"><span class="header-section-number">1.4</span> Discussion</h2>
 <p>While working through a simple way to label the tree, we follow certain assumptions that simplify the process. We need to know what kind of cases we are working with and what a given tree would realistically look like.</p>
-<p>The above labelling only works for trees that always have a duplication or speciation event and experience no gene loss. Further, we assume that each of these events lead to unique taxons/gene ids. Our question for this is whether a speciation (or duplication) event can lead to a species (or geneid) we’ve seen before. For example, the tree below:</p>
+<p>The above labelling only works for trees that always have a duplication or speciation event and experience no gene loss. Further, we assume that each of these events lead to unique taxa/gene ids. Our question for this is whether a speciation (or duplication) event can lead to a species (or geneid) we’ve seen before. For example, the tree below:</p>
 <div id="repeat-spec" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="./figures/RepeatSpecExample.PNG" class="img-fluid figure-img"></p>
@@ -247,7 +253,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <figcaption class="figure-caption">A tree with gene loss, making the paralogous/orthologous relationship unclear.</figcaption>
 </figure>
 </div>
-<p>Without more context (either from possible extra parameters or comparison to other trees), we cannot confidently label the taxons as orthologs or paralogs. In the two simplest cases, the above tree could have resulted from duplication then speciation, or vice versa, with there being gene loss of the “zebra-b” and “horse-a” taxons. Based on which event occured first, the relationship changes.</p>
+<p>Without more context (either from possible extra parameters or comparison to other trees), we cannot confidently label the taxa as orthologs or paralogs. In the two simplest cases, the above tree could have resulted from duplication then speciation, or vice versa, with there being gene loss of the “zebra-b” and “horse-a” taxa. Based on which event occured first, the relationship changes.</p>
 <p>Another point of discussion is inparalogs and outparalogs. Since those relationships are relative to a certain event, is the user specifiying what event to compare the relationships to?</p>
 <p>As for the tool itself, we’d like to know what customizations might be helpful. One thing we plan on adding is to change what the separator is between the species and gene id. The default right now is “-”. We also have the display as a matrix, but this may be unsuitable for very large trees. Some ideas are to output a file (text, cvs, etc.). We also store the relationships in a nested dictionary, so it is easy to look up specific relationships in constant time.</p>
 <div class="cell" data-execution_count="1">
@@ -307,7 +313,7 @@ jupyter_core        5.3.1
 Python 3.10.11 | packaged by Anaconda, Inc. | (main, May 16 2023, 00:55:32) [MSC v.1916 64 bit (AMD64)]
 Windows-10-10.0.19045-SP0
 -----
-Session information updated at 2023-06-27 10:30
+Session information updated at 2023-06-27 13:58
 </pre>
 </details>
 </div>
@@ -610,8 +616,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./references.html" class="pagination-link">
-        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./02-week_0618_0624.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Week Jun 18 - Jun 24</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
@@ -636,19 +642,19 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Visualize tree to confirm structure</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Start at leaves a keep track of the genes we've come across and the species we've come across as we traverse up the tree by storing them in sets.</span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Also label relationships (orthologous or paralogous) as you compare children</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>If there is no shared taxons between the sets of the children, then we assume there is speciation event so we label paralogous</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>If there is no shared taxa between the sets of the children, then we assume there is speciation event so we label paralogous</span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>If there is no shared genes between the sets of the children, then we assume there is a duplication event so we label paralogous</span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>No current handle for if both are true (see discussion below)</span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>If neither are true, no changes occured (we shouldn't see this, that would be a node splitting into two exact children (e.g. (man-a, man-a))).</span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Results</span></span>
 <span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="al">![An example tree with a matrix of relationships between taxons.](./figures/Week1LabelingResult.PNG)</span>{#week1-res}</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="al">![An example tree with a matrix of relationships between taxa.](./figures/Week1LabelingResult.PNG)</span>{#week1-res}</span>
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="fu">## Discussion</span></span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>While working through a simple way to label the tree, we follow certain assumptions that simplify the process. We need to know what kind of cases we are working with and what a given tree would realistically look like.</span>
 <span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>The above labelling only works for trees that always have a duplication or speciation event and experience no gene loss. Further, we assume that each of these events lead to unique taxons/gene ids. Our question for this is whether a speciation (or duplication) event can lead to a species (or geneid) we've seen before. For example, the tree below:</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>The above labelling only works for trees that always have a duplication or speciation event and experience no gene loss. Further, we assume that each of these events lead to unique taxa/gene ids. Our question for this is whether a speciation (or duplication) event can lead to a species (or geneid) we've seen before. For example, the tree below:</span>
 <span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="al">![A tree with two speciations, resulting in two zebra species](./figures/RepeatSpecExample.PNG)</span>{#repeat-spec}</span>
 <span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
@@ -658,7 +664,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="al">![A tree with gene loss, making the paralogous/orthologous relationship unclear.](./figures/AmbigousExample.PNG)</span>{#ambig-ex}</span>
 <span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>Without more context (either from possible extra parameters or comparison to other trees), we cannot confidently label the taxons as orthologs or paralogs. In the two simplest cases, the above tree could have resulted from duplication then speciation, or vice versa, with there being gene loss of the "zebra-b" and "horse-a" taxons. Based on which event occured first, the relationship changes.</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>Without more context (either from possible extra parameters or comparison to other trees), we cannot confidently label the taxa as orthologs or paralogs. In the two simplest cases, the above tree could have resulted from duplication then speciation, or vice versa, with there being gene loss of the "zebra-b" and "horse-a" taxa. Based on which event occured first, the relationship changes.</span>
 <span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>Another point of discussion is inparalogs and outparalogs. Since those relationships are relative to a certain event, is the user specifiying what event to compare the relationships to?</span>
 <span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
