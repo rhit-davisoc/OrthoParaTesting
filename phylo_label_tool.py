@@ -50,7 +50,6 @@ if not args.sep:
 else:
     separator = args.sep
 
-
 def get_species(label):
     i = 0
     if(args.id_first):
@@ -69,7 +68,7 @@ def get_species(label):
 # Label pairs of taxons paralogs or orthologs
 # Orthologs -> Result of a speciation event
 # Paralogs -> Result of a duplication event
-def label_tree_events(tree, start=1.0):
+def label_tree_events(tree):
     rel_dict = {}
     for node in tree.postorder_node_iter():
         if node.is_leaf():
@@ -234,7 +233,9 @@ def print_all_relationships(child_list, rel_dict):
 def write_relationships_of_child(target_child, rel_dict, dir):
     child_list = rel_dict.keys()
 
-    f = open(dir + target_child + ".txt", "w")
+    fname = dir + target_child.replace(args.sep,"") + ".txt"
+
+    f = open(fname, "w")
 
     f.write("taxon\t\trelationship\textra information\n")
 
@@ -260,4 +261,4 @@ if args.targets:
     write_all_relationships(args.targets, rel_dict, args.output)
 else:
     print_all_relationships(rel_dict.keys(), rel_dict)
-    write_all_relationships(rel_dict.keys(), rel_dict, args.output)
+    # write_all_relationships(rel_dict.keys(), rel_dict, args.output)
