@@ -7,6 +7,7 @@ import time
 from ete3 import PhyloTree
 import itertools
 from statistics import mean, median
+import pandas as pd
 
 # Settings for namespace
 namesp_fname = "./namespaces/namespace_5000.txt"
@@ -21,7 +22,7 @@ namespace = namesp_str.strip('][').strip("'").split(', ')
 max_otu_num = len(namespace)
 
 # Generate a random tree with the given number of leaves (OTUs) and return the Newick format
-def build_tree(otu_num):
+def build_random_tree(otu_num):
     if(otu_num > max_otu_num):
         print("OTU number exceeds maximum limit of" + str(max_otu_num))
 
@@ -31,6 +32,12 @@ def build_tree(otu_num):
     taxa = dendropy.TaxonNamespace(namespace)
     tree = treesim.birth_death_tree(0.4, 0.1, taxon_namespace=taxa,num_extant_tips=otu_num)
     nwk = tree.as_string(schema="newick",suppress_edge_lengths=True).strip("[&R] ").replace("'","")
+    return nwk
+
+def nwk_from_file(fname):
+    f = open(fname,"r")
+    nwk = f.read()
+    f.close()
     return nwk
 
 # Build relationship dictionary using our tool and time the process
@@ -95,44 +102,91 @@ def compare_results(nwk, RelTree_dict, ETE_events):
 
 
 # Settings for trial runs
-otu_num = 5000
-runs = 50
-verbose = False
+# otu_nums = [10,20,30,40,50,100,200,300,400,500,600,700,800,900,1000,2000,3000,4000,5000]
+otu_nums = [3500,4500,5000]
+runs = 100
+verbose = True
 
-print("Running " + str(runs) + " time(s) with " + str(otu_num) + " OTU tree(s)...\n")
+# print("Running " + str(runs) + " time(s) with " + str(otu_num) + " OTU tree(s)...\n")
 
 rel_times = []
 ete_times = []
 
-for i in range(0,runs):
-    nwk = build_tree(otu_num)
+low_times = []
+low_newick = []
 
-    rel_return = build_reltree_dict(nwk)
-    ete_return = get_phylotree_events(nwk)
+high_times = []
+high_newick = []
 
-    rel_times.append(rel_return[0])
-    ete_times.append(ete_return[0])
+otus = []
 
-    RelTree_dict = rel_return[1]
-    ETE_events = ete_return[1]
+for otu_num in otu_nums:
+    print("Running trials for " + str(otu_num) + " OTU trees.")
+    for i in range(0,runs):
+        print("Run " + str(i + 1) + " out of " + str(runs) + ".\n")
 
-    compare_results(nwk, RelTree_dict, ETE_events)
+        nwk = build_random_tree(otu_num)
+        # nwk = nwk_from_file("./test_input/low_para_5000.txt")
+
+        rel_return = build_reltree_dict(nwk)
+        ete_return = get_phylotree_events(nwk)
+        rel_time = rel_return[0]
+        ete_time = ete_return[0]
+
+        rel_times.append(rel_time)
+        ete_times.append(ete_time)
+        otus.append(otu_num)
+
+        # df.loc[len(df.index)] = ['Amy', 89, 93] 
+
+        # if (ete_return[0] < .04):
+        #     low_times.append(ete_return[0])
+        #     low_newick.append(nwk)
+
+        # if (ete_return[0] > .3):
+        #     high_times.append(ete_return[0])
+        #     high_newick.append(nwk)
+
+        # RelTree_dict = rel_return[1]
+        # ETE_events = ete_return[1]
+
+        # compare_results(nwk, RelTree_dict, ETE_events)
 
 # Get time stats
-rel_min = min(rel_times)
-rel_max = max(rel_times)
-rel_mean = mean(rel_times)
+# rel_min = min(rel_times)
+# rel_max = max(rel_times)
+# rel_mean = mean(rel_times)
 
-ete_min = min(ete_times)
-ete_max = max(ete_times)
-ete_mean = mean(ete_times)
+# ete_min = min(ete_times)
+# ete_max = max(ete_times)
+# ete_mean = mean(ete_times)
 
-print("Our algorithm time statistics: ")
-print("Min: %f" % rel_min)
-print("Max: %f" % rel_max)
-print("Mean: %f" % rel_mean)
+# print("Our algorithm time statistics: ")
+# print("Min: %f" % rel_min)
+# print("Max: %f" % rel_max)
+# print("Mean: %f" % rel_mean)
 
-print("\nETE algorithm time statistics: ")
-print("Min: %f" % ete_min)
-print("Max: %f" % ete_max)
-print("Mean: %f" % ete_mean)
+# print("\nETE algorithm time statistics: ")
+# print("Min: %f" % ete_min)
+# print("Max: %f" % ete_max)
+# print("Mean: %f" % ete_mean)
+
+times_dict = {"OTUs":otus,"Our Time":rel_times,"ETE Time":ete_times}
+
+df = pd.DataFrame(times_dict)
+
+df.to_pickle("./time_data/time_data_3.pkl") 
+
+# f = open("./test_output/low_ete_trials_512.txt","w")
+
+# for i in range(0,len(low_times)):
+#     f.write("Time: %f\nNewick: %s\n" % (low_times[i], low_newick[i]))
+
+# f.close()
+
+# f = open("./test_output/high_ete_trials_512.txt","w")
+
+# for i in range(0,len(high_times)):
+#     f.write("Time: %f\nNewick: %s\n" % (high_times[i], high_newick[i]))
+
+# f.close()

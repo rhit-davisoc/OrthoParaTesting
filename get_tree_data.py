@@ -2,22 +2,29 @@ import dendropy
 import itertools
 import argparse
 import re
+from statistics import mean, median
 
-p = "./input/ncbi.tre"
+treefname = "./input/low_ete_trials_5000_2.txt"
 
-tree = dendropy.Tree.get(path=p, schema="newick")
+treefile = open(treefname,"r")
+treestr = treefile.read()
+treefile.close()
 
-num_children = len(tree.leaf_nodes())
+tree_arr = re.sub(r"Time:\s+[0-9]*\.[0-9]+\s+[A-Za-z0-9]+:\s",'',treestr).split('\n\n')
 
-print("There are " + str(num_children) + " children")
+for i in range(0,len(tree_arr)-1):
+        tree = tree_arr[i]
+        tree = dendropy.Tree.get(data=tree, schema="newick")
 
-tree.resolve_polytomies()
+        for eg in tree.postorder_edge_iter():
+                eg.length = 1
 
-nwk = tree.as_string(schema="newick",suppress_internal_taxon_labels=True,
-        suppress_internal_node_labels=True,suppress_rooting = False)
+        dists = tree.calc_node_root_distances(return_leaf_distances_only=True)
 
-print("seed node children: " + str(tree.seed_node.num_child_nodes()))
+        max_dist = max(dists)
+        min_dist = min(dists)
+        mean_dist = mean(dists)
+        median_dist = median(dists)
 
-# f = open("./tree.tre","w")
-# f.write(nwk)
+        print("Min: %f\nMax: %f\n Median: %f\nMean: %f\n" % (min_dist, max_dist, median_dist, mean_dist))
 
