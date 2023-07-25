@@ -1,6 +1,13 @@
 import dendropy
 import itertools
 
+class Event:
+    def __init__(self):
+        self.type = None
+        self.leftSp = None
+        self.leftNoSp = None
+        self.rightSp = None
+        self.rightNoSp = None
 
 class RelTree:
     def __init__(self, nwk, sep, *, targets=None, id_first=False):
@@ -124,7 +131,12 @@ class RelTree:
         else:
             return "paralogous"
 
-    # Assign paralogous or orthologous relationship(s) at a given node
+    # Assign paralogous or orthologous relationship(s) at a given node and store it in a dictionary
+    # Input:
+    # node -> The node to assign relationships at. (Each children's clade will be assigned a relationship to the other clades).
+    # rel_dict -> The dictionary to store the relationship information in.
+    # Relationships can be orthologous, in-paralogous, out-paralogous, and ambigious.
+    # Ambigious cases only happen after/during polytomies when speciation events are unknown between two OTU.
     def assign_relationships(self, node, rel_dict):
         children = node.child_nodes()
         num_children = node.num_child_nodes()
@@ -157,6 +169,54 @@ class RelTree:
                             self.assign_orthologous(children[i].clade, children[k].clade, rel_dict)
                         else:
                             self.assign_paralogous(children[i].clade, children[k].clade, rel_dict)
+
+    #Compact version of labeling a tree
+    def label_tree_events_compact(self):
+        tree = self.tree
+        for node in tree.postorder_node_iter():
+            if node.is_leaf():
+                node.species = [self.get_species(str(node.taxon))]
+                node.sp_occur = set()
+                node.no_sp_occur = set([node.taxon.label])
+            else:
+                self.assign_relationships_compact(node)
+
+    def assign_relationships_compact(self, node):
+        children = node.child_nodes()
+        num_children = node.num_child_nodes()
+
+        if num_children == 2:
+            node.species = children[0].species + children[1].species
+
+            if not set(children[0].species) & set(children[1].species):
+                node.event = "S" #-> Speciation
+                node.sp_occur = children[0].sp_occur | children[1].sp_occur | children[0].no_sp_occur | children [1].no_sp_occur
+                node.no_sp_occur = set()
+            else:
+                node.event = "D" #-> Duplication
+                node.sp_occur = children[0].sp_occur | children[1].sp_occur
+                node.no_sp_occur = children[0].no_sp_occur | children [1].no_sp_occur
+        elif num_children == 1:
+            print(num_children)
+
+    def print_compact_relationship(self):
+        self.label_tree_events_compact()
+
+        tree = self.tree
+
+        for node in tree.postorder_internal_node_iter():
+            children = node.child_nodes()
+            if node.event == "S":
+                print('   ORTHOLOGY RELATIONSHIP:', ','.join((children[0].sp_occur | children[0].no_sp_occur)), "<====>", ','.join(children[1].sp_occur | children[1].no_sp_occur))
+            else:
+                if(children[0].no_sp_occur and children[1].no_sp_occur):
+                    print('   IN-PARALOGOUS RELATIONSHIP:', ','.join(children[0].no_sp_occur), "<====>", ','.join(children[1].no_sp_occur))
+
+                if(children[0].sp_occur and (children[0].no_sp_occur or children[1].no_sp_occur)):
+                    print('   OUT-PARALOGOUS RELATIONSHIP:', ','.join(children[0].sp_occur), "<====>", ','.join(children[1].sp_occur | children[1].no_sp_occur))
+                if(children[1].sp_occur):
+                    print('   OUT-PARALOGOUS RELATIONSHIP:', ','.join(children[0].sp_occur | children[0].no_sp_occur), "<====>", ','.join(children[1].sp_occur))
+
 
     # Given a 2d dictionary of relationships, print out a the information in a matrix
     def print_relationships_of_child(self, target_child, rel_dict):

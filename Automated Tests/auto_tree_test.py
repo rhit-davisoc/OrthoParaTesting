@@ -10,7 +10,7 @@ from statistics import mean, median
 import pandas as pd
 
 # Settings for namespace
-namesp_fname = "./namespaces/namespace_5000.txt"
+namesp_fname = "./namespaces/namespace_10000.txt"
 separator = "-"
 
 # Read in generated namespace file. Then create the namespace list and get total number of taxons (or OTUs)
@@ -31,7 +31,12 @@ def build_random_tree(otu_num):
 
     taxa = dendropy.TaxonNamespace(namespace)
     tree = treesim.birth_death_tree(0.4, 0.1, taxon_namespace=taxa,num_extant_tips=otu_num)
+
+    for i, leaf in enumerate(tree.leaf_nodes(),0):
+        leaf.taxon.label = "AAA-" + str(i)
+
     nwk = tree.as_string(schema="newick",suppress_edge_lengths=True).strip("[&R] ").replace("'","")
+
     return nwk
 
 def nwk_from_file(fname):
@@ -57,6 +62,19 @@ def build_reltree_dict(nwk):
 
     return (elapsed_time,dict)
 
+def build_reltree_compact(nwk):
+    RelTree = phylo_label_class.RelTree(nwk,separator)
+    if(verbose):
+        print("Starting RelTree labeling...")
+    start = time.time()
+    RelTree.label_tree_events_compact()
+    end = time.time()
+    elapsed_time = end - start
+
+    if(verbose):
+        print('RelTree dictionary building time:', elapsed_time, 'seconds\n')
+
+    return (elapsed_time,None)
 
 # Compute evolution history using ETE tool and time the process
 def get_phylotree_events(nwk):
@@ -100,11 +118,54 @@ def compare_results(nwk, RelTree_dict, ETE_events):
         print("Mismatched/Total: " + str(mismatches) + "/" + str(total) + "\n")
         print(nwk)
 
+def getHeight(root):
+    children = root.child_nodes()
+
+    if len(children) == 0:
+        return 1
+    else:
+        left_height = getHeight(children[0])
+        right_height = getHeight(children[1])
+
+        return max(left_height + 1, right_height + 1)
+
+def getDiameter(root, diameter):
+    children = root.child_nodes()
+
+    if len(children) == 0:
+        return 1, diameter
+    else:
+        left_height, diameter = getDiameter(children[0], diameter)
+        right_height, diameter = getDiameter(children[1], diameter)
+
+        max_diameter = left_height + right_height + 1
+
+        diameter = max(diameter, max_diameter)
+
+        return max(left_height, right_height) + 1, diameter
+
+def calculate_metrics(nwk,heights,diams,b1s,ctis,sis):
+    tree = dendropy.Tree.get(data=nwk, schema="newick")
+
+    x, diameter = getDiameter(tree.seed_node, 0)
+    diams.append(diameter)
+
+    height = getHeight(tree.seed_node)
+    heights.append(height)
+
+    b1 = dendropy.calculate.treemeasure.B1(tree)
+    b1s.append(b1)
+
+    cti = dendropy.calculate.treemeasure.colless_tree_imbalance(tree)
+    ctis.append(cti)
+
+    si = dendropy.calculate.treemeasure.sackin_index(tree,normalize=True)
+    sis.append(si)
 
 # Settings for trial runs
 # otu_nums = [10,20,30,40,50,100,200,300,400,500,600,700,800,900,1000,2000,3000,4000,5000]
-otu_nums = [3500,4500,5000]
-runs = 100
+otu_nums = [100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000]
+runs = 500
 verbose = True
 
 # print("Running " + str(runs) + " time(s) with " + str(otu_num) + " OTU tree(s)...\n")
@@ -112,13 +173,13 @@ verbose = True
 rel_times = []
 ete_times = []
 
-low_times = []
-low_newick = []
-
-high_times = []
-high_newick = []
-
 otus = []
+
+b1s = []
+ctis = []
+sis = []
+diams = []
+heights = []
 
 for otu_num in otu_nums:
     print("Running trials for " + str(otu_num) + " OTU trees.")
@@ -128,7 +189,7 @@ for otu_num in otu_nums:
         nwk = build_random_tree(otu_num)
         # nwk = nwk_from_file("./test_input/low_para_5000.txt")
 
-        rel_return = build_reltree_dict(nwk)
+        rel_return = build_reltree_compact(nwk)
         ete_return = get_phylotree_events(nwk)
         rel_time = rel_return[0]
         ete_time = ete_return[0]
@@ -137,15 +198,7 @@ for otu_num in otu_nums:
         ete_times.append(ete_time)
         otus.append(otu_num)
 
-        # df.loc[len(df.index)] = ['Amy', 89, 93] 
-
-        # if (ete_return[0] < .04):
-        #     low_times.append(ete_return[0])
-        #     low_newick.append(nwk)
-
-        # if (ete_return[0] > .3):
-        #     high_times.append(ete_return[0])
-        #     high_newick.append(nwk)
+        calculate_metrics(nwk,heights,diams,b1s,ctis,sis)
 
         # RelTree_dict = rel_return[1]
         # ETE_events = ete_return[1]
@@ -171,22 +224,8 @@ for otu_num in otu_nums:
 # print("Max: %f" % ete_max)
 # print("Mean: %f" % ete_mean)
 
-times_dict = {"OTUs":otus,"Our Time":rel_times,"ETE Time":ete_times}
+times_dict = {"Our Time":rel_times,"ETE Time":ete_times,"Height": heights, "Diameter": diams, "CTI":ctis, "SI":sis, "B1":b1s, "OTUs":otus}
 
 df = pd.DataFrame(times_dict)
 
-df.to_pickle("./time_data/time_data_3.pkl") 
-
-# f = open("./test_output/low_ete_trials_512.txt","w")
-
-# for i in range(0,len(low_times)):
-#     f.write("Time: %f\nNewick: %s\n" % (low_times[i], low_newick[i]))
-
-# f.close()
-
-# f = open("./test_output/high_ete_trials_512.txt","w")
-
-# for i in range(0,len(high_times)):
-#     f.write("Time: %f\nNewick: %s\n" % (high_times[i], high_newick[i]))
-
-# f.close()
+df.to_pickle("./time_data/compact_compare_2.pkl") 
