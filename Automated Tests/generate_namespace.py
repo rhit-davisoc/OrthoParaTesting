@@ -2,8 +2,8 @@ import random
 import math
 from string import ascii_uppercase as alc
 
-filename = "./namespaces/namespace_10000.txt"
-tax_num = 10000
+filename = "./namespaces/namespace_131072.txt"
+tax_num = 131072
 
 def generate_namespace(total):
     list = []

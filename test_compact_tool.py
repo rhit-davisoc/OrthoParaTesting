@@ -26,17 +26,17 @@ for ev in events:
     elif ev.etype == "D":
         print('   PARALOGY RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
 
-# matches = t.search_nodes(name="Hsa_001")
-# human_seq = matches[0]
-# # Obtains its evolutionary events
-# events = human_seq.get_my_evol_events()
-# # Print its orthology and paralogy relationships
-# print("Events detected that involve Hsa_001:")
-# for ev in events:
-#     if ev.etype == "S":
-#         print('   ORTHOLOGY RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
-#         print('   IN-PARALOGS:', ','.join(ev.inparalogs))
-#     elif ev.etype == "D":
-#         print('   PARALOGY RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
-#         print('   IN-PARALOGS:', ','.join(ev.inparalogs))
-#         print('   OUT-PARALOGS:', ','.join(ev.outparalogs))
+matches = t.search_nodes(name="HHH-1")
+human_seq = matches[0]
+# Obtains its evolutionary events
+events = human_seq.get_my_evol_events()
+# Print its orthology and paralogy relationships
+print("\nEvents detected that involve HHH-1:")
+for ev in events:
+    if ev.etype == "S":
+        print('   ORTHOLOGY RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
+        print('   IN-PARALOGS:', ','.join(ev.inparalogs))
+    elif ev.etype == "D":
+        print('   PARALOGY RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
+        print('   IN-PARALOGS:', ','.join(ev.inparalogs))
+        print('   OUT-PARALOGS:', ','.join(ev.outparalogs))

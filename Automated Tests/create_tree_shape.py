@@ -1,7 +1,7 @@
 import random
 
 # Settings for namespace
-namesp_fname = "./namespaces/namespace_5000.txt"
+namesp_fname = "./namespaces/namespace_131072.txt"
 
 # Read in generated namespace file. Then create the namespace list and get total number of taxons (or OTUs)
 namesp_file = open(namesp_fname,"r")
@@ -41,8 +41,8 @@ def build_balanced_helper(size,index):
 def build_balanced(size):
     nwk = build_balanced_helper(size,0) + ";"
 
-    f = open("./test_input/balanced_tree.txt","w")
+    f = open("./test_input/balanced_tree_32768.txt","w")
     f.write(nwk)
     f.close()
 
-build_balanced(512)
+build_balanced(32768)
