@@ -1,5 +1,5 @@
-import dendropy
-import itertools
+""" Modules providing argument parsing (argparse) and our phylogenetic 
+    tree labeling class (phylo_label_class)."""
 import argparse
 import phylo_label_class
 
@@ -39,9 +39,8 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-nwk_file = open(args.input,"r")
-nwk = nwk_file.read()
-nwk_file.close()
+with open(args.input,"r",encoding="utf-8") as nwk_file:
+    nwk = nwk_file.read()
 
 RelTree = phylo_label_class.RelTree(nwk, args.sep)
 
