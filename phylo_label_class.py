@@ -3,7 +3,6 @@
     itertools - provides a way to iterate through the combination of two list"""
 
 import itertools
-import dendropy
 
 class Event:
     """ Class representing an event (speciation or duplication) in a phylogentic tree."""
@@ -18,13 +17,13 @@ class Event:
 class RelTree:
     """ Class representing the tree of species relationships """
     def __init__(self, nwk, sep, *, targets=None, id_first=False):
-        self.tree = dendropy.Tree.get(data=nwk, schema="newick")
+        self.tree = nwk
         self.separator = sep
         self.targets = targets
         self.id_first = id_first
 
     def display_tree(self):
-        """ Prints a tree using acii characters. """
+        """ Prints a tree using ascii characters. """
         print(self.tree.as_ascii_plot())
 
     def get_species(self, label):
@@ -37,7 +36,7 @@ class RelTree:
             return label.split(" ")[i]
 
         elif self.separator not in label:
-            print("Incorrect separator\n")
+            print("Separator does not exist in all OTU labels\n")
             exit()
 
         return label.split(self.separator)[i]
@@ -138,7 +137,7 @@ class RelTree:
                 if i != k:
                     if speciation and duplication:
                         break
-                    if not set(children[i].species & set(children[k].species)):
+                    if not set(children[i].species) & set(children[k].species):
                         speciation = True
                     else:
                         duplication = True
