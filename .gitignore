@@ -2,3 +2,10 @@
 env/
 output/
 __pycache__/
+Automated Tests/*.out
+Automated Tests/namespaces/namespace_50000.txt
+Automated Tests/results_2024/
+Automated Tests/rpectinatetest.txt
+Automated Tests/test_trees/
+Automated Tests/test_trees_info/
+Automated Tests/balance_tests/

@@ -10,9 +10,10 @@ from statistics import mean, median
 import pandas as pd
 import functools
 import gc
+import random
 
 # Settings for namespace
-namesp_fname = "./namespaces/namespace_10000.txt"
+namesp_fname = "./namespaces/namespace_50000.txt"
 separator = "-"
 
 # Read in generated namespace file. Then create the namespace list and get total number of taxons (or OTUs)
@@ -26,14 +27,17 @@ taxa = dendropy.TaxonNamespace(namespace)
 
 # Generate a random tree with the given number of leaves (OTUs) and return the Newick format
 @functools.lru_cache(maxsize = None)
-def build_random_tree(otu_num):
+def build_random_tree(otu_num,run):
     if(otu_num > max_otu_num):
         print("OTU number exceeds maximum limit of" + str(max_otu_num))
 
     if(verbose):
         print("Building random tree...")
 
-    tree = treesim.birth_death_tree(0.4, 0.1, taxon_namespace=taxa,num_extant_tips=otu_num)
+    s = otu_num + run
+    r = random.Random(s)
+    
+    tree = treesim.birth_death_tree(0.4, 0.1, taxon_namespace=taxa,num_extant_tips=otu_num,rng=r)
 
     # for i, leaf in enumerate(tree.leaf_nodes(),0):
     #     leaf.taxon.label = "AAA-" + str(i)
@@ -151,27 +155,32 @@ def getDiameter(root, diameter):
 
         return max(left_height, right_height) + 1, diameter
 
-def calculate_metrics(nwk,ctis,sis,small_outgs):
+def calculate_metrics(nwk):
     tree = dendropy.Tree.get(data=nwk, schema="newick")
 
     cti = dendropy.calculate.treemeasure.colless_tree_imbalance(tree)
-    ctis.append(cti)
+    return cti
 
-    si = dendropy.calculate.treemeasure.sackin_index(tree,normalize=False)
-    sis.append(si)
+# def calculate_metrics(nwk,ctis,sis,small_outgs):
+#     tree = dendropy.Tree.get(data=nwk, schema="newick")
 
-    r_children = tree.seed_node.child_nodes()
-    small_outg = min(len(r_children[0].leaf_nodes()),len(r_children[1].leaf_nodes()))
-    small_outgs.append(small_outg)
+#     cti = dendropy.calculate.treemeasure.colless_tree_imbalance(tree)
+#     ctis.append(cti)
+
+#     si = dendropy.calculate.treemeasure.sackin_index(tree,normalize=False)
+#     sis.append(si)
+
+#     r_children = tree.seed_node.child_nodes()
+#     small_outg = min(len(r_children[0].leaf_nodes()),len(r_children[1].leaf_nodes()))
+#     small_outgs.append(small_outg)
 
 
 # Settings for trial runs
-# otu_nums = [10,20,30,40,50,100,200,300,400,500,600,700,800,900,1000,2000,3000,4000,5000]
-# otu_nums = [100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000]
-# otu_nums = [100,200,300]
 # otu_nums = [100,200,300,400,500,600,700,800,900,1000]
-otu_nums = [1100]
-runs = 1
+# otu_nums = [1000,2000,3000,4000,5000,6000,7000,8000,9000,10000]
+otu_nums = [4096]
+run_start = 124
+run_end = 1000
 verbose = True
 
 # print("Running " + str(runs) + " time(s) with " + str(otu_num) + " OTU tree(s)...\n")
@@ -197,35 +206,35 @@ def time_check(nwk):
     elapsed = end - start
     return elapsed
 
+def getRuntimes(type,i,input_file,output):
+    nwk = nwk_from_file(input_file)
+
+    build_reltree_compact.cache_clear()
+    rel_return = build_reltree_compact(nwk)
+    build_reltree_compact.cache_clear()
+    ete_return = get_phylotree_events(nwk)
+    rel_time = rel_return[0]
+    ete_time = ete_return[0]
+
+    cti = calculate_metrics(nwk)
+
+    f = open(output,"a")
+    f.write(type + "," + str(i) + "," + str(cti) + "," + str(rel_time) + "," + str(ete_time) + "\n")
+    f.close()
+
+
+sys.setrecursionlimit(5000)
+
 for otu_num in otu_nums:
-    print("Running trials for " + str(otu_num) + " OTU trees.")
-    for i in range(0,runs):
-        print("Run " + str(i + 1) + " out of " + str(runs) + ".\n")
+    print("Running trials for " + str(otu_num) + " OTU trees. Starting at run " + str(run_start))
+    for i in range(run_start,run_end):
+        runs = run_end - run_start
+        print("Run " + str(i + 1 - run_start) + " out of " + str(runs) + ".\n")
 
-        gc.collect()
-
-        # build_random_tree.cache_clear()
-        # nwk = build_random_tree(otu_num)
-        # build_random_tree.cache_clear()
-
-        nwk = nwk_from_file("./test_input/balanced_tree_32768.txt")
-
-        build_reltree_compact.cache_clear()
-        rel_return = build_reltree_compact(nwk)
-        build_reltree_compact.cache_clear()
-        # ete_return = get_phylotree_events(nwk)
-        rel_time = rel_return[0]
-        # ete_time = ete_return[0]
-
-        rel_times.append(rel_time)
-        # time_returns.append(time_return)
-        # ete_times.append(ete_time)
-        otus.append(otu_num)
-
-# times_dict = {"Our Time":rel_times,"Height": heights, "Diameter": diams, "CTI":ctis, "SI":sis, "B1":b1s, "OTUs":otus}
-# times_dict = {"Our Time":rel_times,"ETE Time":ete_times, "Number of OTUs":otus}
-# times_dict = {"Our Time":rel_times, "Number of OTUs":otus}
-
-# df = pd.DataFrame(times_dict)
-
-# df.to_pickle("./time_data/final_time_data_3.pkl") 
+        try:
+            # getRuntimes("balanced",i,"./balance_tests/balanced_" + str(i) + ".txt","./results_2024/balanced_tests_4096_1.csv")
+            # getRuntimes("pectinate",i,"./balance_tests/pectinate_" + str(i) + ".txt","./results_2024/balanced_tests_4096_1.csv")
+            # getRuntimes("random",i,"./test_trees/tree_4096" + str(i) + ".txt","./results_2024/balanced_tests_4096_1.csv")
+            getRuntimes("right pectinate",i,"./balance_tests/pectinateR_" + str(i) + ".txt","./results_2024/balanced_tests_4096_1.csv")
+        except:
+            print("Malformed Statement Error occured at i: " + str(i))
