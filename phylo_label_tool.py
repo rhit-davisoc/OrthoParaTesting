@@ -1,7 +1,9 @@
-import dendropy
-import itertools
+""" Modules providing argument parsing (argparse) and our phylogenetic 
+    tree labeling class (phylo_label_class)."""
 import argparse
+import sys
 import phylo_label_class
+import dendropy
 
 parser = argparse.ArgumentParser(
     description="Label orthologous/paralogous relationships of a given tree."
@@ -39,26 +41,31 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-nwk_file = open(args.input,"r")
-nwk = nwk_file.read()
-nwk_file.close()
-
-RelTree = phylo_label_class.RelTree(nwk, args.sep)
-
-if args.display:
-    RelTree.display_tree()
+with open(args.input,"r",encoding="utf-8") as nwk_file:
+    nwk = nwk_file.read()
 
 if not args.sep:
     separator = input("Specify the separator: ")
     print("")
-else:
-    separator = args.sep
+    args.sep = separator
 
-rel_dict = RelTree.get_relationship_dict()
-
-if args.targets:
-    RelTree.print_all_relationships(args.targets, rel_dict)
-    RelTree.write_all_relationships(args.targets, rel_dict, args.output)
+try:
+    nwk=dendropy.Tree.get(data=nwk, schema="newick")
+    print("NEWICK:")
+    print(nwk)
+except:
+    print("Newick Tree formatted incorrectly.")
 else:
-    RelTree.print_all_relationships(rel_dict.keys(), rel_dict)
+    RelTree = phylo_label_class.RelTree(nwk, args.sep)
+
+    if args.display:
+        RelTree.display_tree()
+
+    rel_dict = RelTree.get_relationship_dict()
+
+    if args.targets:
+        RelTree.print_all_relationships(args.targets, rel_dict)
+        RelTree.write_all_relationships(args.targets, rel_dict, args.output)
+    else:
+        RelTree.print_all_relationships(rel_dict.keys(), rel_dict)
     # write_all_relationships(rel_dict.keys(), rel_dict, args.output)

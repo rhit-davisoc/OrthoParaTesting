@@ -22,9 +22,9 @@ events = t.get_descendant_evol_events()
 print("Events detected from the root of the tree")
 for ev in events:
     if ev.etype == "S":
-        print('   ORTHOLOGY RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
+        print('   ORTHOLOGOUS RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
     elif ev.etype == "D":
-        print('   PARALOGY RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
+        print('   PARALOGOUS RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
 
 matches = t.search_nodes(name="HHH-1")
 human_seq = matches[0]
@@ -34,9 +34,9 @@ events = human_seq.get_my_evol_events()
 print("\nEvents detected that involve HHH-1:")
 for ev in events:
     if ev.etype == "S":
-        print('   ORTHOLOGY RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
+        print('   ORTHOLOGOUS RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
         print('   IN-PARALOGS:', ','.join(ev.inparalogs))
     elif ev.etype == "D":
-        print('   PARALOGY RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
+        print('   PARALOGOUS RELATIONSHIP:', ','.join(ev.in_seqs), "<====>", ','.join(ev.out_seqs))
         print('   IN-PARALOGS:', ','.join(ev.inparalogs))
         print('   OUT-PARALOGS:', ','.join(ev.outparalogs))
