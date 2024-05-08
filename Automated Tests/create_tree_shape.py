@@ -11,9 +11,6 @@ namesp_file.close()
 namespace = namesp_str.strip('][').strip("'").split(', ')
 random.shuffle(namespace)
 
-# Size multiple of 2 and greater than or equal to 2.
-tree_size = 4096
-
 
 # Build a pectinate tree weighted to one side: e.g (((((a,b),c),d),e),f);
 def build_unbalanced(size,seed,nmsp):
@@ -25,7 +22,7 @@ def build_unbalanced(size,seed,nmsp):
 
     nwk += ";"
 
-    f = open("./balance_tests/pectinate_" + str(seed) + ".txt","w")
+    f = open("./balance_tests/pectinate" + str(size) + "_" + str(seed) + ".txt","w")
     f.write(nwk)
     f.close()
 
@@ -40,7 +37,7 @@ def build_unbalanced_right(size,seed,nmsp):
 
     nwk += ";"
 
-    f = open("./balance_tests/pectinateR_" + str(seed) + ".txt","w")
+    f = open("./balance_tests/pectinateR" + str(size) + "_" + str(seed) + ".txt","w")
     f.write(nwk)
     f.close()
 
@@ -55,22 +52,22 @@ def build_balanced_helper(nmsp,size,index):
 def build_balanced(size,seed,nmsp):
     nwk = build_balanced_helper(nmsp,size,0) + ";"
 
-    f = open("./balance_tests/balanced_" + str(seed) +".txt","w")
+    f = open("./balance_tests/balanced" + str(size) + "_" + str(seed) +".txt","w")
     f.write(nwk)
     f.close()
 
 
-def create_tests(seed):
+def create_tests(seed,tree_size):
     random.seed(seed)
 
     namespace = namesp_str.strip('][').strip("'").split(', ')
     random.shuffle(namespace)
 
-    # build_balanced(tree_size,seed,namespace)
-    # build_unbalanced(tree_size,seed,namespace)
+    build_balanced(tree_size,seed,namespace)
+    build_unbalanced(tree_size,seed,namespace)
     build_unbalanced_right(tree_size,seed,namespace)
 
-
-for i in range(0,1000):
-    print("Creating balanced/pectinate tree " + str(i) + "\n")
-    create_tests(i)
+for size in [2,4,8,16,32,64,128,256,512,1024,2048]:
+    for i in range(0,1000):
+        print("Creating balanced/pectinate tree " + str(i) + " of size " + str(size) + "\n")
+        create_tests(i,size)

@@ -74,11 +74,13 @@ elif(t == 6):
 elif(t == 7):
     otu_nums = [10000]
 elif(t==8):
-    otu_nums = [4096]
+    otu_nums = [4,8,16,32,64,128,256,512,1024,2048]
 
 run_start = 0
 run_end = 1000
 verbose = True
+
+tree_info_csv = "./test_trees_info/tree_info_powersof2.csv"
 
 for otu_num in otu_nums:
     print("Running trials for " + str(otu_num) + " OTU trees. Starting at run " + str(run_start))
@@ -87,17 +89,17 @@ for otu_num in otu_nums:
         print("Run " + str(i + 1 - run_start) + " out of " + str(runs) + ".\n")
 
         if(t==8):
-            tree_seed = 4096*1000 + i
+            tree_seed = otu_num*1000 + i
 
             nwk = build_random_tree(tree_seed)
 
             cti = calculate_metrics(nwk)
 
-            f = open("./test_trees_info/tree_info_4096" + str(t) + ".csv", "a")
+            f = open(tree_info_csv, "a")
             f.write(str(tree_seed) + "," + str(otu_num) + "," + str(cti) + "\n")
             f.close()
 
-            f = open("./test_trees/tree_" + str(tree_seed) + ".txt", "w")
+            f = open("./balance_tests_rand/tree" + str(otu_num) + "_" + str(i) + ".txt", "w")
             f.write(nwk)
             f.close()
         else:
@@ -107,7 +109,7 @@ for otu_num in otu_nums:
 
             cti = calculate_metrics(nwk)
 
-            f = open("./test_trees_info/tree_info_" + str(t) + ".csv", "a")
+            f = open(tree_info_csv, "a")
             f.write(str(tree_seed) + "," + str(otu_num) + "," + str(cti) + "\n")
             f.close()
 

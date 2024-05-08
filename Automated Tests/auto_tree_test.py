@@ -11,6 +11,8 @@ import pandas as pd
 import functools
 import gc
 import random
+from memory_profiler import profile
+from matplotlib import pylab
 
 # Settings for namespace
 namesp_fname = "./namespaces/namespace_50000.txt"
@@ -70,7 +72,9 @@ def build_reltree_dict(nwk):
     return (elapsed_time,dict)
 
 @functools.lru_cache(maxsize = None)
+@profile
 def build_reltree_compact(nwk):
+    nwk=dendropy.Tree.get(data=nwk, schema="newick")
     RelTree = phylo_label_class.RelTree(nwk,separator)
     if(verbose):
         print("Starting RelTree labeling...")
@@ -88,6 +92,7 @@ def build_reltree_compact(nwk):
     return (elapsed_time,None)
 
 # Compute evolution history using ETE tool and time the process
+@profile
 def get_phylotree_events(nwk):
     t = PhyloTree(nwk)
 
@@ -98,6 +103,10 @@ def get_phylotree_events(nwk):
     events = t.get_descendant_evol_events()
     end = time.time()
     elapsed_time = end - start
+
+    root = t.get_tree_root()
+    outg1, outg2=root.get_children()
+    smaller_out = outg1 if len(outg2) else outg2
 
     if(verbose):
         print('ETE PhyloTree event labeling time:', elapsed_time, 'seconds\n\n')
@@ -178,9 +187,10 @@ def calculate_metrics(nwk):
 # Settings for trial runs
 # otu_nums = [100,200,300,400,500,600,700,800,900,1000]
 # otu_nums = [1000,2000,3000,4000,5000,6000,7000,8000,9000,10000]
-otu_nums = [4096]
-run_start = 124
-run_end = 1000
+# otu_nums = [4,8,16,32,64,128,256,512,1024,2048]
+otu_nums=[1000]
+run_start = 1
+run_end = 2
 verbose = True
 
 # print("Running " + str(runs) + " time(s) with " + str(otu_num) + " OTU tree(s)...\n")
@@ -206,7 +216,7 @@ def time_check(nwk):
     elapsed = end - start
     return elapsed
 
-def getRuntimes(type,i,input_file,output):
+def getRuntimes(type,otu,i,input_file,output):
     nwk = nwk_from_file(input_file)
 
     build_reltree_compact.cache_clear()
@@ -218,12 +228,14 @@ def getRuntimes(type,i,input_file,output):
 
     cti = calculate_metrics(nwk)
 
-    f = open(output,"a")
-    f.write(type + "," + str(i) + "," + str(cti) + "," + str(rel_time) + "," + str(ete_time) + "\n")
-    f.close()
+    # f = open(output,"a")
+    # f.write(type + "," + str(otu) + "," + str(i) + "," + str(cti) + "," + str(rel_time) + "," + str(ete_time) + "\n")
+    # f.close()
 
 
 sys.setrecursionlimit(5000)
+
+output = "./results_2024/balanced_tests_2-2048.csv"
 
 for otu_num in otu_nums:
     print("Running trials for " + str(otu_num) + " OTU trees. Starting at run " + str(run_start))
@@ -231,10 +243,12 @@ for otu_num in otu_nums:
         runs = run_end - run_start
         print("Run " + str(i + 1 - run_start) + " out of " + str(runs) + ".\n")
 
-        try:
-            # getRuntimes("balanced",i,"./balance_tests/balanced_" + str(i) + ".txt","./results_2024/balanced_tests_4096_1.csv")
-            # getRuntimes("pectinate",i,"./balance_tests/pectinate_" + str(i) + ".txt","./results_2024/balanced_tests_4096_1.csv")
-            # getRuntimes("random",i,"./test_trees/tree_4096" + str(i) + ".txt","./results_2024/balanced_tests_4096_1.csv")
-            getRuntimes("right pectinate",i,"./balance_tests/pectinateR_" + str(i) + ".txt","./results_2024/balanced_tests_4096_1.csv")
-        except:
-            print("Malformed Statement Error occured at i: " + str(i))
+        tree_seed = 100*otu_num + i
+
+        getRuntimes("random",otu_num,i,"./test_trees/tree_" + str(tree_seed) + ".txt",output)
+
+        # try:
+        #     #getRuntimes("random",otu_num,i,"./balance_tests_rand/tree" + str(otu_num) + "_" + str(i) + ".txt",output)
+        #     getRuntimes("random",otu_num,i,"./test_trees/tree1000_" + str(i) + ".txt",output)
+        # except:
+        #     print("Malformed Statement Error occured at i: " + str(i))
