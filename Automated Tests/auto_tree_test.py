@@ -11,7 +11,6 @@ import pandas as pd
 import functools
 import gc
 import random
-from memory_profiler import profile
 from matplotlib import pylab
 
 # Settings for namespace
@@ -30,6 +29,7 @@ taxa = dendropy.TaxonNamespace(namespace)
 # Generate a random tree with the given number of leaves (OTUs) and return the Newick format
 @functools.lru_cache(maxsize = None)
 def build_random_tree(otu_num,run):
+    taxa = dendropy.TaxonNamespace(namespace)
     if(otu_num > max_otu_num):
         print("OTU number exceeds maximum limit of" + str(max_otu_num))
 
@@ -45,6 +45,34 @@ def build_random_tree(otu_num,run):
     #     leaf.taxon.label = "AAA-" + str(i)
 
     nwk = tree.as_string(schema="newick",suppress_edge_lengths=True).strip("[&R] ").replace("'","")
+
+    return nwk
+
+def build_random_tree_species(otu_num,num_tax,s):
+    namesp_fname = "./namespaces/" + str(otu_num) + "tot_" + str(num_tax) + "tax.txt"
+    namesp_file = open(namesp_fname,"r")
+    namesp_str = namesp_file.read()
+    namesp_file.close()
+
+    namespace = namesp_str.strip('][').strip("'").split(', ')
+    max_otu_num = len(namespace)
+    taxa = dendropy.TaxonNamespace(namespace)
+
+    if(verbose):
+        print("Building random tree...")
+
+    r = random.Random(s)
+    
+    tree = treesim.birth_death_tree(0.4, 0.1, taxon_namespace=taxa,num_extant_tips=otu_num,rng=r)
+
+    # for i, leaf in enumerate(tree.leaf_nodes(),0):
+    #     leaf.taxon.label = "AAA-" + str(i)
+
+    nwk = tree.as_string(schema="newick",suppress_edge_lengths=True).strip("[&R] ").replace("'","")
+
+    f = open("./species_num_tests/species" + str(num_tax) + "_id" + str(s) + ".txt","w")
+    f.write(nwk)
+    f.close()
 
     return nwk
 
@@ -72,7 +100,6 @@ def build_reltree_dict(nwk):
     return (elapsed_time,dict)
 
 @functools.lru_cache(maxsize = None)
-@profile
 def build_reltree_compact(nwk):
     nwk=dendropy.Tree.get(data=nwk, schema="newick")
     RelTree = phylo_label_class.RelTree(nwk,separator)
@@ -92,7 +119,6 @@ def build_reltree_compact(nwk):
     return (elapsed_time,None)
 
 # Compute evolution history using ETE tool and time the process
-@profile
 def get_phylotree_events(nwk):
     t = PhyloTree(nwk)
 
@@ -216,9 +242,7 @@ def time_check(nwk):
     elapsed = end - start
     return elapsed
 
-def getRuntimes(type,otu,i,input_file,output):
-    nwk = nwk_from_file(input_file)
-
+def getRuntimes(type,otu,i,nwk,output):
     build_reltree_compact.cache_clear()
     rel_return = build_reltree_compact(nwk)
     build_reltree_compact.cache_clear()
@@ -232,23 +256,47 @@ def getRuntimes(type,otu,i,input_file,output):
     # f.write(type + "," + str(otu) + "," + str(i) + "," + str(cti) + "," + str(rel_time) + "," + str(ete_time) + "\n")
     # f.close()
 
+def getRuntimesSpecies(species,otu,i,nwk,output):
+    build_reltree_compact.cache_clear()
+    rel_return = build_reltree_compact(nwk)
+    build_reltree_compact.cache_clear()
+    ete_return = get_phylotree_events(nwk)
+    rel_time = rel_return[0]
+    ete_time = ete_return[0]
+
+    cti = calculate_metrics(nwk)
+
+    f = open(output,"a")
+    f.write(str(otu) + "," + str(species) + "," + str(i) + "," + str(cti) + "," + str(rel_time) + "," + str(ete_time) + "\n")
+    f.close()
 
 sys.setrecursionlimit(5000)
 
 output = "./results_2024/balanced_tests_2-2048.csv"
 
-for otu_num in otu_nums:
-    print("Running trials for " + str(otu_num) + " OTU trees. Starting at run " + str(run_start))
-    for i in range(run_start,run_end):
-        runs = run_end - run_start
-        print("Run " + str(i + 1 - run_start) + " out of " + str(runs) + ".\n")
+# for otu_num in otu_nums:
+#     print("Running trials for " + str(otu_num) + " OTU trees. Starting at run " + str(run_start))
+#     for i in range(run_start,run_end):
+#         runs = run_end - run_start
+#         print("Run " + str(i + 1 - run_start) + " out of " + str(runs) + ".\n")
 
-        tree_seed = 100*otu_num + i
+#         tree_seed = 100*otu_num + i
 
-        getRuntimes("random",otu_num,i,"./test_trees/tree_" + str(tree_seed) + ".txt",output)
+#         getRuntimes("random",otu_num,i,"./test_trees/tree_" + str(tree_seed) + ".txt",output)
 
         # try:
         #     #getRuntimes("random",otu_num,i,"./balance_tests_rand/tree" + str(otu_num) + "_" + str(i) + ".txt",output)
         #     getRuntimes("random",otu_num,i,"./test_trees/tree1000_" + str(i) + ".txt",output)
         # except:
         #     print("Malformed Statement Error occured at i: " + str(i))
+
+
+otu_num = 2000
+num_tax_list = [1,2,5,10,20,30,40,50,100,200,300,400,500,1000,2000]
+output="./results_2024/species_tests_2000.csv"
+
+for i in range(0,500):
+    for num_tax in num_tax_list:
+        print("Creating random tree" + str(i) + " of size " + str(otu_num) + "\n")
+        nwk = build_random_tree_species(otu_num,num_tax,i)
+        getRuntimesSpecies(num_tax,otu_num,i,nwk,output)

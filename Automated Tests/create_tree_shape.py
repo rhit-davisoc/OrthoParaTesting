@@ -67,7 +67,7 @@ def create_tests(seed,tree_size):
     build_unbalanced(tree_size,seed,namespace)
     build_unbalanced_right(tree_size,seed,namespace)
 
-for size in [2,4,8,16,32,64,128,256,512,1024,2048]:
-    for i in range(0,1000):
-        print("Creating balanced/pectinate tree " + str(i) + " of size " + str(size) + "\n")
-        create_tests(i,size)
+# for size in [2,4,8,16,32,64,128,256,512,1024,2048]:
+#     for i in range(0,1000):
+#         print("Creating balanced/pectinate tree " + str(i) + " of size " + str(size) + "\n")
+#         create_tests(i,size)
