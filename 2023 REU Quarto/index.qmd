@@ -1,9 +1,0 @@
----
-execute:
-  eval: false
-  cache: true
-  freeze: auto
----
-
-# Introduction {.unnumbered}
-

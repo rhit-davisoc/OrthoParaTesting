@@ -121,7 +121,7 @@ class RelTree:
             elif special_event == "paralogous":
                 event = "paralogous"
             else:
-                event = "ambiguous"
+                event = "N/"
 
             relationship_dict[tax_1.label][tax_2.label] = event
             relationship_dict[tax_2.label][tax_1.label] = event
