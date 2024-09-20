@@ -68,4 +68,3 @@ else:
         RelTree.write_all_relationships(args.targets, rel_dict, args.output)
     else:
         RelTree.print_all_relationships(rel_dict.keys(), rel_dict)
-    # write_all_relationships(rel_dict.keys(), rel_dict, args.output)
